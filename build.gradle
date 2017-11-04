@@ -1,0 +1,93 @@
+/*
+ * Copyright (C) 2017 Jorge Ruesga
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+ext {
+    libraries = [
+        support                     : '27.0.0'
+    ]
+
+    testLibraries = [
+        junit                       : '4.12',
+        hamcrest                    : '1.4-atlassian-1',
+        mockito                     : '2.11.0',
+        powermock                   : '2.0.0-beta.5'
+    ]
+}
+
+allprojects {
+    buildscript {
+        repositories {
+            google()
+            jcenter()
+        }
+        dependencies {
+            classpath 'com.android.tools.build:gradle:3.0.0'
+            classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:0.8.1'
+        }
+    }
+
+    repositories {
+        google()
+        jcenter()
+    }
+
+    gradle.projectsEvaluated {
+        tasks.withType(JavaCompile) {
+            options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+        }
+    }
+}
+
+subprojects {
+    afterEvaluate {project ->
+        dependencies {
+            testImplementation "junit:junit:${testLibraries.junit}"
+            testImplementation "org.hamcrest:hamcrest-core:${testLibraries.hamcrest}"
+            testImplementation "org.hamcrest:hamcrest-library:${testLibraries.hamcrest}"
+            testImplementation "org.mockito:mockito-core:${testLibraries.mockito}"
+            testImplementation "org.powermock:powermock-module-junit4:${testLibraries.powermock}"
+            testImplementation "org.powermock:powermock-module-junit4-rule:${testLibraries.powermock}"
+            testImplementation "org.powermock:powermock-api-mockito2:${testLibraries.powermock}"
+        }
+
+        if (project.plugins.hasPlugin('android') || project.plugins.hasPlugin('android-library')) {
+            android {
+                compileSdkVersion 27
+                buildToolsVersion '27.0.0'
+
+                defaultConfig {
+                    minSdkVersion 16
+                    targetSdkVersion 27
+
+                    testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+                }
+
+                compileOptions {
+                    sourceCompatibility = JavaVersion.VERSION_1_8
+                    targetCompatibility = JavaVersion.VERSION_1_8
+                }
+
+                packagingOptions {
+                    exclude 'META-INF/DEPENDENCIES'
+                    exclude 'META-INF/NOTICE'
+                    exclude 'META-INF/LICENSE'
+                    exclude 'META-INF/LICENSE.txt'
+                    exclude 'META-INF/NOTICE.txt'
+                }
+            }
+        }
+    }
+}
